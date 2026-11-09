@@ -1,120 +1,64 @@
 <!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>COMBAT ZONE — Urban Assault</title>
-<style>
-:root{color-scheme:dark}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#090d0e;font-family:Arial,Helvetica,sans-serif;color:#e9eee9}canvas{display:block}
-#hud{position:fixed;inset:0;pointer-events:none;display:none;text-shadow:0 2px 5px #000}
-.top{position:absolute;top:18px;left:22px;right:22px;display:flex;justify-content:space-between;align-items:flex-start}
-.brand{font-weight:900;letter-spacing:3px;font-size:18px}.brand small{display:block;color:#a9b7a9;font-size:9px;letter-spacing:2px;margin-top:4px}
-.stats{display:flex;gap:20px;text-align:right;font-size:11px;color:#aeb9ae}.stats b{display:block;color:#fff;font-size:20px;margin-top:3px}
-.bottom{position:absolute;bottom:22px;left:22px;right:22px;display:flex;align-items:end;justify-content:space-between}
-.health{font-size:11px;color:#c6d0c5;letter-spacing:1px}.bar{width:160px;height:6px;background:#26302b;margin-top:7px}.bar i{display:block;height:100%;width:100%;background:#a8c66a}
-.ammo{text-align:right;font-weight:900;font-size:34px}.ammo small{font-size:11px;color:#b3beb3;display:block;letter-spacing:2px}
-#crosshair{position:absolute;left:50%;top:50%;width:22px;height:22px;transform:translate(-50%,-50%)}
-#crosshair:before,#crosshair:after{content:"";position:absolute;background:#e7eee4;box-shadow:0 0 4px #000}
-#crosshair:before{width:2px;height:18px;left:10px;top:2px}#crosshair:after{height:2px;width:18px;top:10px;left:2px}
-#hit{position:absolute;left:50%;top:50%;font-size:35px;transform:translate(-50%,-50%);opacity:0;color:#f3e5bd}
-#toast{position:absolute;top:24%;width:100%;text-align:center;font-size:12px;letter-spacing:3px;color:#d9e5d4}
-#overlay{position:fixed;inset:0;display:grid;place-items:center;background:linear-gradient(110deg,rgba(5,10,10,.96),rgba(9,15,14,.72)),radial-gradient(ellipse at 70% 50%,#45533b 0,transparent 55%)}
-.panel{width:min(560px,90vw);padding:34px;border:1px solid #64705b;background:rgba(11,17,15,.88);box-shadow:0 20px 80px #000}
-.kicker{color:#b3ca82;letter-spacing:4px;font-size:10px;font-weight:bold}
-h1{font-size:clamp(42px,8vw,76px);line-height:.9;margin:15px 0 12px;letter-spacing:-3px}
-h1 span{color:#b3ca82}.sub{color:#aab5aa;font-size:13px;line-height:1.6;max-width:430px}
-button{margin-top:24px;border:0;background:#b3ca82;color:#11170f;padding:16px 25px;font-weight:900;letter-spacing:2px;cursor:pointer}
-button:hover{background:#d0e69c}.help{margin-top:22px;border-top:1px solid #39443a;padding-top:16px;color:#9da99d;font-size:11px;line-height:1.9}
-#loading{position:fixed;bottom:16px;left:0;right:0;text-align:center;color:#7d897d;font-size:10px;letter-spacing:2px}
-@media(max-width:600px){.stats{gap:9px}.stats b{font-size:16px}.bottom{bottom:14px}.brand{font-size:14px}}
-</style>
-</head>
-<body>
-<div id="overlay"><div class="panel">
-<div class="kicker">SIMULACIÓN TÁCTICA · PROTOTIPO WEB</div>
-<h1>COMBAT<br><span>ZONE</span></h1>
-<div class="sub">OPERACIÓN: DISTRITO CERO<br>Entra en una zona urbana de entrenamiento. Elimina objetivos hostiles y mantente en movimiento.</div>
-<button id="start">INICIAR OPERACIÓN</button>
-<div class="help"><b>CONTROLES</b><br>W A S D — Moverse &nbsp; · &nbsp; MOUSE — Mirar<br>CLIC IZQUIERDO — Disparar &nbsp; · &nbsp; R — Recargar<br>SHIFT — Correr &nbsp; · &nbsp; ESC — Pausar</div>
-</div></div>
-<div id="hud">
- <div class="top"><div class="brand">COMBAT ZONE<small>SECTOR 04 / DISTRITO CERO</small></div>
- <div class="stats"><div>OBJETIVOS<b id="kills">0 / 8</b></div><div>ESTADO<b id="state">EN COMBATE</b></div></div></div>
- <div id="crosshair"></div><div id="hit">×</div><div id="toast">ZONA HOSTIL — LOCALIZA LOS OBJETIVOS</div>
- <div class="bottom"><div class="health">SALUD <b id="hp">100</b><div class="bar"><i id="hpbar"></i></div></div><div class="ammo" id="ammo">30 <small>MUNICIÓN / 90 · R RECARGAR</small></div></div>
-</div>
-<div id="loading">CARGANDO ENTORNO 3D…</div>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>COMBAT ZONE 6.7 — Distrito Gris</title><style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;overflow:hidden;background:#111;font:14px Arial,sans-serif;color:#e8edf0}canvas{display:block}#hud{position:fixed;inset:0;pointer-events:none;text-shadow:0 2px 5px #000}#top{position:absolute;top:18px;left:20px;display:flex;gap:10px;align-items:center} .panel{background:#101820d9;border:1px solid #82909a66;padding:10px 14px;border-radius:4px;backdrop-filter:blur(8px)}#health{width:130px;height:7px;background:#333;margin-top:6px}#health i{display:block;height:100%;width:100%;background:#b6c56b}#ammo{position:absolute;right:24px;bottom:24px;font-size:25px;font-weight:bold}#mission{position:absolute;left:20px;bottom:22px;max-width:260px;line-height:1.5}#cross{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:18px;height:18px}#cross:before,#cross:after{content:'';position:absolute;background:#e9f1e8;box-shadow:0 0 4px #000}#cross:before{left:8px;top:1px;width:2px;height:16px}#cross:after{left:1px;top:8px;width:16px;height:2px}#hit{position:absolute;left:50%;top:50%;font-size:30px;opacity:0;transform:translate(-50%,-50%);color:#fff}#start{position:fixed;inset:0;background:linear-gradient(110deg,#071019ed,#111a1dcc),url('');display:grid;place-items:center;z-index:5}#start .card{max-width:560px;width:calc(100% - 32px);padding:clamp(24px,5vw,42px);background:linear-gradient(145deg,#17232aee,#0c1319f5);border:1px solid #a9bb7855;border-radius:8px;box-shadow:0 28px 100px #000, inset 0 1px #ffffff12;position:relative;overflow:hidden}#start .card:before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:#a9bb78}#start .card p{color:#b9c4c7;line-height:1.65;font-size:13px}#start .card h1{font-size:clamp(30px,6vw,42px);letter-spacing:2px}#start{background:radial-gradient(ellipse at 78% 45%,#68735b55,transparent 40%),linear-gradient(115deg,#071019f5,#111a1de8)}h1{letter-spacing:3px;margin:0 0 5px;font-size:32px}small{color:#aebbc3}.btn{border:0;background:#b7ca83;color:#172018;font-weight:900;letter-spacing:1.5px;padding:15px 28px;border-radius:3px;cursor:pointer;margin-top:18px;transition:transform .15s,background .15s}.btn:hover{background:#d0e59b;transform:translateY(-2px)}#toast{position:absolute;top:22%;left:50%;transform:translateX(-50%);font-weight:bold;opacity:0;color:#e6eacb}
+</style></head><body>
+<div id="start"><div class="card"><h1>COMBAT ZONE <span style="color:#a9bb78">6.7</span></h1><small>OPERACIÓN: DISTRITO GRIS · COMBATE URBANO</small><p>Combate táctico en primera persona. Distrito urbano optimizado, ocho objetivos móviles, disparos visibles y selección de armamento.</p><p><b>WASD</b> mover · <b>Ratón</b> apuntar · <b>Click</b> disparar · <b>R</b> recargar · <b>Shift</b> correr · <b>1–8</b> armas · <b>Esc</b> liberar ratón</p><button class="btn" id="play">INICIAR OPERACIÓN</button></div></div>
+<div id="hud"><div id="top"><div class="panel"><b>OPERADOR 01</b><div style="font-size:11px;color:#aebbc3">SALUD</div><div id="health"><i></i></div></div><div class="panel">OBJETIVOS: <b id="kills">0 / 8</b></div><div class="panel" id="fps">CALIDAD: AUTO</div></div><div id="cross"></div><div id="hit">×</div><div id="ammo">30 <small>/ 120</small></div><div id="mission" class="panel">OBJETIVO<br>Neutraliza a los hostiles del distrito.<br><small>Busca cobertura entre los edificios.</small></div><div id="toast">IMPACTO CONFIRMADO</div></div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 <script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-const $=id=>document.getElementById(id);
-const scene=new THREE.Scene();scene.background=new THREE.Color(0x87928a);scene.fog=new THREE.Fog(0x87928a,35,105);
-const camera=new THREE.PerspectiveCamera(74,innerWidth/innerHeight,.1,180);camera.position.set(0,1.7,12);
-const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance'});
-renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.shadowMap.enabled=false;renderer.outputColorSpace=THREE.SRGBColorSpace;document.body.appendChild(renderer.domElement);
-scene.add(new THREE.HemisphereLight(0xdce6dc,0x42483e,2));
-const sun=new THREE.DirectionalLight(0xffe5bd,2.2);sun.position.set(-20,35,15);scene.add(sun);
-const mats={ground:new THREE.MeshStandardMaterial({color:0x555b50,roughness:1}),wall:new THREE.MeshStandardMaterial({color:0x77796e,roughness:1}),dark:new THREE.MeshStandardMaterial({color:0x303b39,roughness:1}),window:new THREE.MeshStandardMaterial({color:0x283b3b,roughness:.8}),road:new THREE.MeshStandardMaterial({color:0x343a37,roughness:1}),line:new THREE.MeshBasicMaterial({color:0xb3ae83}),crate:new THREE.MeshStandardMaterial({color:0x65684c}),enemy:new THREE.MeshStandardMaterial({color:0x555d4c}),visor:new THREE.MeshStandardMaterial({color:0x202c2c})};
-function box(x,y,z,sx,sy,sz,mat){const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),mat);m.position.set(x,y,z);scene.add(m);return m}
-box(0,-.18,0,150,.3,150,mats.ground);box(0,-.01,0,13,.04,150,mats.road);
-for(let z=-62;z<=62;z+=8){box(0,.02,z,.12,.025,3,mats.line)}
-// compact city blocks
-for(let side of [-1,1])for(let z=-52;z<=52;z+=13){
- const x=side*(13+Math.random()*5),w=8+Math.random()*5,d=9+Math.random()*3,h=7+Math.random()*13;
- box(x,h/2,z,w,h,d,mats.wall);
- box(x,h+.12,z,w+.25,.25,d+.25,mats.dark);
- for(let yy=2.2;yy<h-1;yy+=2.6)for(let xx=-w/2+1.2;xx<w/2-.5;xx+=2.2){
-  box(x+xx,yy,z-d/2-.03,1.15,1.25,.08,mats.window);
-  box(x+xx,yy,z+d/2+.03,1.15,1.25,.08,mats.window);
- }
- box(x,1,z-d/2-.12,w,.25,.2,mats.dark);
-}
-// street cover and barriers
-for(let i=0;i<22;i++){let x=(Math.random()-.5)*10,z=(Math.random()-.5)*100; if(Math.abs(x)<2&&Math.abs(z)<8)continue;box(x,.65,z,1.5,1.3,1.2,mats.crate)}
-// street lamps
-for(let z=-45;z<=45;z+=18){for(let x of [-5.8,5.8]){box(x,3.1,z,.12,6,.12,mats.dark);box(x,6,z,.9,.12,.3,mats.line)}}
-const enemies=[];const enemyGeo=new THREE.Group();
-function makeEnemy(x,z,i){
- const g=new THREE.Group();g.position.set(x,0,z);scene.add(g);
- const body=new THREE.Mesh(new THREE.BoxGeometry(.65,1,.38),mats.enemy);body.position.y=1.05;g.add(body);
- const head=new THREE.Mesh(new THREE.BoxGeometry(.38,.38,.38),mats.crate);head.position.y=1.77;g.add(head);
- const vest=new THREE.Mesh(new THREE.BoxGeometry(.72,.48,.42),mats.dark);vest.position.set(0,1.08,0);g.add(vest);
- const gun=new THREE.Mesh(new THREE.BoxGeometry(.12,.12,.8),mats.visor);gun.position.set(.32,1.12,-.38);g.add(gun);
- const e={group:g,hp:100,alive:true,phase:Math.random()*6,shoot:2+Math.random()*3};enemies.push(e);
-}
-for(let i=0;i<8;i++){let side=i%2?1:-1;makeEnemy(side*(3.7+Math.random()*2),-12-Math.floor(i/2)*12,i)}
-const player={hp:100,ammo:30,reserve:90,kills:0,reloading:false};let active=false,locked=false,vel=new THREE.Vector3(),yaw=0,pitch=0,last=performance.now(),fireWait=0,damageWait=0;
-const keys={};addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='KeyR')reload();});addEventListener('keyup',e=>keys[e.code]=false);
-const overlay=$('overlay'),hud=$('hud');
-$('start').onclick=()=>{active=true;overlay.style.display='none';hud.style.display='block';renderer.domElement.requestPointerLock()};
-document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===renderer.domElement;if(!locked&&active){active=false;overlay.style.display='grid';$('start').textContent='REANUDAR OPERACIÓN';$('state').textContent='PAUSADO'}});
-document.addEventListener('mousemove',e=>{if(!locked)return;yaw-=e.movementX*.0022;pitch-=e.movementY*.0022;pitch=Math.max(-1.25,Math.min(1.25,pitch));camera.rotation.set(pitch,yaw,0,'YXZ')});
-document.addEventListener('mousedown',e=>{if(e.button===0&&locked)shoot()});
-function reload(){if(player.reloading||player.ammo===30||player.reserve<=0)return;player.reloading=true;$('ammo').innerHTML='… <small>RECARGANDO</small>';setTimeout(()=>{let n=Math.min(30-player.ammo,player.reserve);player.ammo+=n;player.reserve-=n;player.reloading=false;updateHUD()},950)}
-const ray=new THREE.Raycaster();const center=new THREE.Vector2(0,0);let tracers=[];
-function shoot(){if(!active||player.reloading||fireWait>0)return;if(player.ammo<=0){reload();return}player.ammo--;fireWait=.16;updateHUD();
- const dir=new THREE.Vector3();camera.getWorldDirection(dir);ray.set(camera.position,dir);ray.far=65;
- const targets=[];for(const e of enemies)if(e.alive)e.group.traverse(o=>{if(o.isMesh)targets.push(o)});
- const hits=ray.intersectObjects(targets,false);const start=camera.position.clone().add(dir.clone().multiplyScalar(.7));let end=start.clone().add(dir.clone().multiplyScalar(48));
- if(hits.length){end=hits[0].point.clone();const e=enemies.find(a=>{let found=false;a.group.traverse(o=>{if(o===hits[0].object)found=true});return found});if(e){e.hp-=50;$('hit').style.opacity=1;setTimeout(()=>$('hit').style.opacity=0,100);if(e.hp<=0){e.alive=false;e.group.rotation.z=Math.PI/2;e.group.position.y=-.7;player.kills++;$('kills').textContent=player.kills+' / 8';if(player.kills===8)toast('SECTOR ASEGURADO — OBJETIVOS ELIMINADOS')}}}
- const geo=new THREE.BufferGeometry().setFromPoints([start,end]);const line=new THREE.Line(geo,new THREE.LineBasicMaterial({color:0xffd78a,transparent:true,opacity:.95}));scene.add(line);tracers.push({line,t:0});
- // small muzzle flash
- const flash=new THREE.Mesh(new THREE.SphereGeometry(.075,6,6),new THREE.MeshBasicMaterial({color:0xffbd62}));flash.position.copy(start);scene.add(flash);setTimeout(()=>{scene.remove(flash);flash.geometry.dispose();flash.material.dispose()},55);
-}
-function toast(t){$('toast').textContent=t}
-function updateHUD(){$('ammo').innerHTML=player.ammo+' <small>MUNICIÓN / '+player.reserve+' · R RECARGAR</small>';$('hp').textContent=player.hp;$('hpbar').style.width=player.hp+'%'}
-function damage(){if(damageWait>0||!active)return;damageWait=1.1;player.hp=Math.max(0,player.hp-8);updateHUD();if(player.hp===0){active=false;document.exitPointerLock();toast('OPERACIÓN FALLIDA');$('start').textContent='REINTENTAR';overlay.style.display='grid';player.hp=100;player.ammo=30;player.reserve=90;player.kills=0;enemies.forEach(e=>{e.alive=true;e.hp=100;e.group.position.y=0;e.group.rotation.set(0,0,0)});$('kills').textContent='0 / 8';updateHUD()}}
-function update(dt,t){
- fireWait=Math.max(0,fireWait-dt);damageWait=Math.max(0,damageWait-dt);
- if(active&&locked){
-  const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw)),right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));let move=new THREE.Vector3();
-  if(keys.KeyW)move.add(forward);if(keys.KeyS)move.sub(forward);if(keys.KeyD)move.add(right);if(keys.KeyA)move.sub(right);
-  if(move.lengthSq())move.normalize().multiplyScalar((keys.ShiftLeft?9:5)*dt);
-  camera.position.add(move);camera.position.x=THREE.MathUtils.clamp(camera.position.x,-5.7,5.7);camera.position.z=THREE.MathUtils.clamp(camera.position.z,-68,68);camera.position.y=1.7;
-  for(const e of enemies){if(!e.alive)continue;e.phase+=dt*1.5;e.group.position.x+=Math.sin(e.phase)*dt*.28;e.group.lookAt(camera.position.x,0,camera.position.z);e.shoot-=dt;if(e.shoot<=0&&e.group.position.distanceTo(camera.position)<34){damage();e.shoot=2.4+Math.random()*2.8}}
- }
- for(let i=tracers.length-1;i>=0;i--){let a=tracers[i];a.t+=dt;if(a.t>.075){scene.remove(a.line);a.line.geometry.dispose();a.line.material.dispose();tracers.splice(i,1)}}
-}
-function loop(now){requestAnimationFrame(loop);const dt=Math.min((now-last)/1000,.04);last=now;update(dt,now/1000);renderer.render(scene,camera)}
-requestAnimationFrame(loop);$('loading').style.display='none';
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.5))});
-</script>
-</body></html>
+import * as THREE from 'three';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+import { OBJLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/OBJLoader.js';
+const gltfLoader=new GLTFLoader(), objLoader=new OBJLoader();
+const loadedModels={};
+function loadGLB(url){return new Promise((resolve,reject)=>gltfLoader.load(url,g=>resolve(g.scene),undefined,reject));}
+function fitModel(root,maxDim){root.updateMatrixWorld(true);const b=new THREE.Box3().setFromObject(root),s=new THREE.Vector3();b.getSize(s);const max=Math.max(s.x,s.y,s.z)||1;root.scale.multiplyScalar(maxDim/max);root.updateMatrixWorld(true);const b2=new THREE.Box3().setFromObject(root),c=b2.getCenter(new THREE.Vector3());root.position.sub(c);return root;}
+
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x9aa4a3);scene.fog=new THREE.FogExp2(0x9aa4a3,.012);
+const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.08,180);camera.position.set(0,1.7,9);
+const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'low-power'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.25));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=false;renderer.outputColorSpace=THREE.SRGBColorSpace;document.body.appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xcbd9df,0x4a4b43,2));const sun=new THREE.DirectionalLight(0xffe6c2,2.1);sun.position.set(-20,35,15);scene.add(sun);
+const mat=(c,r=.9,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});const concrete=mat(0x777b78),dark=mat(0x303b3d),glass= new THREE.MeshStandardMaterial({color:0x253a43,roughness:.25,metalness:.4}),sand=mat(0xaaa18d),metal=mat(0x303638,.4,.75),olive=mat(0x414a37),skin=mat(0x8b735e);
+const box=(w,h,d,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);parent.add(o);return o};
+// Ground and road markings
+box(180,.3,180,mat(0x555b57),0,-.22,0);box(14,.02,150,mat(0x353a3a),0,-.05,0);for(let z=-65;z<70;z+=12)box(.18,.025,5,mat(0xc1b58c),0,.0,z);
+// modular urban blocks
+for(let side of [-1,1])for(let i=0;i<8;i++){let z=-65+i*18,w=9+((i*7)%5),h=9+((i*13)%15),x=side*(12+w/2);let b=box(w,h,13, i%3===0?dark:concrete,x,h/2,z);b.userData.building=true;box(w+.2,.35,13+.2,mat(0x343a39),x,h+.18,z);for(let yy=2.4;yy<h-1;yy+=2.7)for(let xx=-w/2+1.2;xx<w/2-.5;xx+=2.3){box(1.25,1.1,.08,glass,x+xx,yy,z-6.56);box(1.4,.12,.22,metal,x+xx,yy-.62,z-6.45)}for(let k=0;k<3;k++)box(.3,.8,.3,metal,x-w/2+1+k*1.2,1,z+2);}
+// Kenney CC0 commercial/suburban buildings: real GLB assets, fitted and instanced sparsely for low-end PCs.
+const buildingFiles=['building-a','building-c','building-e','building-g','building-i','building-k','building-m','building-skyscraper-a','low-detail-building-a','building-type-b','building-type-f','building-type-j'];
+for(let i=0;i<buildingFiles.length;i++){const name=buildingFiles[i];const folder=name.startsWith('building-type')?'./assets/buildings/':'./assets/buildings/';const path=folder+name+'.glb';loadGLB(path).then(model=>{fitModel(model, i===7?18:11);const side=i%2?1:-1;model.position.set(side*(17+(i%3)*2),5.2,-58+i*10);model.rotation.y=side<0?Math.PI:0;scene.add(model);loadedModels[name]=model;}).catch(()=>{});}
+// debris, barriers, lamps
+for(let i=0;i<24;i++){let x=(Math.random()-.5)*28,z=(Math.random()-.5)*125;if(Math.abs(x)<8)continue;let o=box(.5+Math.random(),.3+Math.random()*.5,.5+Math.random(),i%2?sand:dark,x,.15,z);o.rotation.y=Math.random()*3}
+for(let z=-55;z<65;z+=25){box(2,.9,.7,sand,-7,.45,z);box(2,.9,.7,sand,7,.45,z+9)}
+// distant skyline silhouettes
+for(let i=0;i<35;i++){let x=(Math.random()-.5)*150,z=-90-Math.random()*35,h=10+Math.random()*28;box(8,h,8,mat(0x646d6b),x,h/2,z)}
+// Parked Kenney CC0 vehicles (GLB); decorative and inexpensive, not yet drivable.
+const vehicleFiles=['sedan','suv','van','police','truck','ambulance'];
+vehicleFiles.forEach((name,i)=>loadGLB('./assets/vehicles/'+name+'.glb').then(model=>{fitModel(model,4.2);model.position.set(i%2?5.5:-5.5,.55,-12-i*17);model.rotation.y=i%2?Math.PI:0;scene.add(model);}).catch(()=>{}));
+const toast=document.querySelector('#toast');
+// weapon model in camera space
+const gun=new THREE.Group();camera.add(gun);gun.position.set(.34,-.28,-.68);box(.16,.17,.62,metal,0,0,0,gun);box(.19,.13,.22,dark,0,-.13,.12,gun);box(.06,.06,.42,metal,0,.015,-.46,gun);box(.12,.08,.16,olive,0,.12,-.1,gun);box(.025,.035,.1,mat(0x111111),0,.1,-.44,gun);
+const muzzle=new THREE.PointLight(0xffa34a,0,4);muzzle.position.set(0,.01,-.73);gun.add(muzzle);const flash=new THREE.Mesh(new THREE.ConeGeometry(.12,.35,6),new THREE.MeshBasicMaterial({color:0xffbd66,transparent:true,opacity:0}));flash.rotation.x=-Math.PI/2;flash.position.set(0,.01,-.82);gun.add(flash);
+// Real OBJ weapon models supplied with this project. The procedural rifle remains as fallback.
+let importedWeapon=null;const weaponFiles=['m16.obj','stg44.obj','sniper.obj','12_gauge.obj','pistol.obj','magnum_44.obj','rpg7.obj','v2.obj'];let weaponIndex=0;function selectWeapon(i){weaponIndex=(i+weaponFiles.length)%weaponFiles.length;if(importedWeapon){gun.remove(importedWeapon);importedWeapon.traverse(n=>{if(n.geometry)n.geometry.dispose();});importedWeapon=null;}objLoader.load('./assets/weapons/'+weaponFiles[weaponIndex],obj=>{obj.traverse(n=>{if(n.isMesh){n.material=new THREE.MeshStandardMaterial({color:0x454941,metalness:.48,roughness:.55});n.castShadow=false;n.receiveShadow=false;}});fitModel(obj,weaponIndex===6?.72:.82);obj.rotation.set(0,Math.PI,0);obj.position.set(0,-.03,-.42);gun.add(obj);importedWeapon=obj;},undefined,()=>{});toast.textContent='ARMA: '+weaponFiles[weaponIndex].replace('.obj','').toUpperCase();toast.style.opacity=1;setTimeout(()=>toast.style.opacity=0,900);}selectWeapon(0);
+
+// enemies
+const enemies=[];function soldier(x,z){let g=new THREE.Group();g.position.set(x,0,z);scene.add(g);const torso=box(.65,.9,.36,olive,0,1.12,0,g);box(.46,.48,.4,dark,0,1.83,0,g);let head=box(.32,.36,.3,skin,0,2.27,0,g);box(.42,.16,.42,mat(0x343b32),0,2.46,0,g);box(.7,.13,.4,olive,0,1.65,-.03,g);for(let s of [-1,1]){box(.19,.72,.2,olive,s*.43,1.12,0,g);box(.22,.78,.22,olive,s*.19,.4,0,g)}box(.16,.65,.18,dark,0,1.05,-.29,g);g.userData={hp:3,alive:true,baseX:x,baseZ:z,phase:Math.random()*6};enemies.push(g)}
+for(let i=0;i<8;i++)soldier((i%2?1:-1)*(10+Math.random()*5),-18-i*10);
+// Imported character mesh from the uploaded OBJ pack; procedural soldier stays as fallback.
+objLoader.load('./assets/characters/mode2.obj',model=>{model.traverse(n=>{if(n.isMesh){n.material=new THREE.MeshStandardMaterial({color:0x414b3a,roughness:.92});n.castShadow=false;}});fitModel(model,1.9);for(const enemy of enemies){const clone=model.clone(true);clone.position.set(0,0,0);enemy.clear();enemy.add(clone);}});
+
+// tracer and impacts
+const tracers=[];function tracer(a,b){let geo=new THREE.BufferGeometry().setFromPoints([a,b]);let line=new THREE.Line(geo,new THREE.LineBasicMaterial({color:0xffd58a,transparent:true,opacity:1}));scene.add(line);tracers.push({line,t:.075})}
+const sparks=[];function impact(p){for(let i=0;i<5;i++){let m=new THREE.Mesh(new THREE.SphereGeometry(.035,5,4),new THREE.MeshBasicMaterial({color:0xffbd68}));m.position.copy(p);scene.add(m);sparks.push({m,v:new THREE.Vector3((Math.random()-.5)*3,Math.random()*3,(Math.random()-.5)*3),t:.28})}}
+let ammo=30,reserve=120,kills=0,health=100,locked=false,shooting=false,lastShot=0,reloading=false;const keys={};const ray=new THREE.Raycaster();const clock=new THREE.Clock();const vel=new THREE.Vector3();const forward=new THREE.Vector3();
+const ammoEl=document.querySelector('#ammo'),healthEl=document.querySelector('#health i'),killEl=document.querySelector('#kills'),hitEl=document.querySelector('#hit');function hud(){ammoEl.innerHTML=`${ammo} <small>/ ${reserve}</small>`;healthEl.style.width=health+'%';killEl.textContent=`${kills} / 8`}
+function reload(){if(reloading||ammo===30||reserve<=0)return;reloading=true;document.querySelector('#toast').textContent='RECARGANDO';toast.style.opacity=1;setTimeout(()=>{let n=Math.min(30-ammo,reserve);ammo+=n;reserve-=n;reloading=false;toast.style.opacity=0;hud()},1100)}
+function fire(){let now=performance.now();if(now-lastShot<105||reloading||ammo<=0){if(ammo<=0)reload();return}lastShot=now;ammo--;hud();gun.position.z=-.68+.045;gun.rotation.x=-.035;muzzle.intensity=3;flash.material.opacity=1;setTimeout(()=>{muzzle.intensity=0;flash.material.opacity=0},55);setTimeout(()=>{gun.position.z=-.68;gun.rotation.x=0},75);camera.getWorldDirection(forward);let start=camera.position.clone().add(forward.clone().multiplyScalar(.7));ray.setFromCamera(new THREE.Vector2(0,0),camera);const targets=enemies.filter(e=>e.userData.alive);let hits=ray.intersectObjects(targets,true);let end=start.clone().add(forward.clone().multiplyScalar(65));if(hits.length){let h=hits[0];end.copy(h.point);let obj=h.object;while(obj.parent&&!obj.userData.hp)obj=obj.parent;if(obj.userData.hp){obj.userData.hp--;impact(h.point);hitEl.style.opacity=1;setTimeout(()=>hitEl.style.opacity=0,100);if(obj.userData.hp<=0){obj.userData.alive=false;obj.visible=false;kills++;hud();toast.textContent=kills===8?'DISTRITO ASEGURADO':'HOSTIL ELIMINADO';toast.style.opacity=1;setTimeout(()=>toast.style.opacity=0,800)}}}else{let p=end.clone();p.y=Math.max(.1,p.y);impact(p)}tracer(start,end)}
+renderer.domElement.addEventListener('click',()=>{if(document.pointerLockElement!==renderer.domElement)renderer.domElement.requestPointerLock()});document.addEventListener('pointerlockchange',()=>locked=document.pointerLockElement===renderer.domElement);document.addEventListener('mousemove',e=>{if(!locked)return;camera.rotation.order='YXZ';camera.rotation.y-=e.movementX*.0022;camera.rotation.x-=e.movementY*.0022;camera.rotation.x=Math.max(-1.45,Math.min(1.45,camera.rotation.x))});document.addEventListener('mousedown',e=>{if(e.button===0&&locked)shooting=true});document.addEventListener('mouseup',()=>shooting=false);document.addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='KeyR')reload()});document.addEventListener('keyup',e=>keys[e.code]=false);document.addEventListener('keydown',e=>{if(e.code.startsWith('Digit')){const n=Number(e.code.slice(5));if(n>=1&&n<=8)selectWeapon(n-1);}});
+document.querySelector('#play').onclick=()=>{document.querySelector('#start').style.display='none';renderer.domElement.requestPointerLock()};
+let frames=0,ft=0;function loop(){requestAnimationFrame(loop);let dt=Math.min(clock.getDelta(),.04),t=clock.elapsedTime;if(shooting)fire();let speed=keys.ShiftLeft?8:5.2;let dir=new THREE.Vector3((keys.KeyD?1:0)-(keys.KeyA?1:0),0,(keys.KeyS?1:0)-(keys.KeyW?1:0));if(dir.lengthSq())dir.normalize().applyAxisAngle(new THREE.Vector3(0,1,0),camera.rotation.y);camera.position.addScaledVector(dir,speed*dt);camera.position.x=THREE.MathUtils.clamp(camera.position.x,-8.8,8.8);camera.position.z=THREE.MathUtils.clamp(camera.position.z,-73,73);camera.position.y=1.7+Math.sin(t*9)*.018*(dir.length()>0?1:0);
+for(let e of enemies){if(!e.userData.alive)continue;let dx=camera.position.x-e.position.x,dz=camera.position.z-e.position.z,d=Math.hypot(dx,dz);if(d>4&&d<32){e.position.x+=dx/d*dt*.65;e.position.z+=dz/d*dt*.65}e.rotation.y=Math.atan2(dx,dz)}
+for(let i=tracers.length-1;i>=0;i--){let o=tracers[i];o.t-=dt;o.line.material.opacity=Math.max(0,o.t/.075);if(o.t<=0){scene.remove(o.line);o.line.geometry.dispose();o.line.material.dispose();tracers.splice(i,1)}}for(let i=sparks.length-1;i>=0;i--){let s=sparks[i];s.t-=dt;s.v.y-=8*dt;s.m.position.addScaledVector(s.v,dt);if(s.t<=0){scene.remove(s.m);sparks.splice(i,1)}}frames++;ft+=dt;if(ft>1){document.querySelector('#fps').textContent=`FPS ${frames} · AUTO`;frames=0;ft=0}renderer.render(scene,camera)}loop();
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,1.25));renderer.setSize(innerWidth,innerHeight)});hud();
+</script></body></html>

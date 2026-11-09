@@ -60,7 +60,7 @@ try{
   await page.waitForTimeout(1250);
   check('25 recarga devuelve cargador a 30',await page.evaluate(()=>window.__combatZone.ammo===30));
   check('26 recarga consume reserva',await page.evaluate(()=>window.__combatZone.reserve===118));
-  check('27 no hay excepciones JavaScript',pageErrors.length===0 && pageErrors.join('; '));
+  check('27 no hay excepciones JavaScript',pageErrors.length===0);
   console.log('RESULTADO: 27/27 pruebas superadas');
 } finally {
   if(browser) await browser.close();

@@ -47,6 +47,16 @@ jobs:
           cp -a "$source_dir/assets" ./assets
           echo "Modelos instalados:"
           find assets -type f | wc -l
+      - name: Setup Node.js for browser tests
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright and Chromium
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Run 27 browser smoke tests
+        run: node tests/smoke.mjs
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:

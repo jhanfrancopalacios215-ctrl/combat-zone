@@ -24,7 +24,7 @@ try{
   await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});
   try{await page.waitForFunction(()=>window.__combatZone!==undefined,null,{timeout:18000})}catch(e){console.error('PAGE ERRORS',pageErrors);console.error('CONSOLE ERRORS',consoleErrors);console.error('FAILED REQUESTS',failedRequests);throw e}
   const check=(name,condition)=>{assert.ok(condition,name);console.log('PASS '+name)};
-  check('01 documento HTML carga',await page.title()==='COMBAT ZONE 6.7 — Distrito Gris');
+  check('01 documento HTML carga',await page.title()==='COMBAT ZONE 6.8 — Distrito Gris');
   check('02 pantalla inicial visible',await page.locator('#start').isVisible());
   check('03 botón de inicio existe',await page.locator('#play').count()===1);
   check('04 HUD de salud existe',await page.locator('#health i').count()===1);
@@ -60,8 +60,9 @@ try{
   await page.waitForTimeout(1250);
   check('25 recarga devuelve cargador a 30',await page.evaluate(()=>window.__combatZone.ammo===30));
   check('26 recarga consume reserva',await page.evaluate(()=>window.__combatZone.reserve===118));
-  check('27 no hay excepciones JavaScript',pageErrors.length===0);
-  console.log('RESULTADO: 27/27 pruebas superadas');
+  check('27 los ocho enemigos conservan articulaciones animables',await page.evaluate(()=>window.__combatZone.animatedEnemies));
+  check('28 no hay excepciones JavaScript',pageErrors.length===0);
+  console.log('RESULTADO: 28/28 pruebas superadas');
 } finally {
   if(browser) await browser.close();
   server.close();

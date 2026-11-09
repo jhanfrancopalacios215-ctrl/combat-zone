@@ -26,11 +26,16 @@ jobs:
       - name: Install 3D models from the supplied asset pack
         shell: bash
         run: |
-          archive="COMBAT_ZONE_6_6_REPARADO_2.zip"
-          if [ ! -f "$archive" ]; then
-            echo "::error::Falta $archive en la raíz del repositorio. Súbelo desde Add file > Upload files."
+          archive=""
+          for candidate in COMBAT_ZONE_6_6_REPARADO_2.zip COMBAT_ZONE_6_6_RECONSTRUIDO.zip; do
+            if [ -f "$candidate" ]; then archive="$candidate"; break; fi
+          done
+          if [ -z "$archive" ]; then
+            echo "::error::No se encontró el paquete de modelos 3D esperado en la raíz del repositorio."
+            ls -lah
             exit 1
           fi
+          echo "Usando paquete: $archive"
           mkdir -p /tmp/combat-zone-assets
           unzip -q "$archive" -d /tmp/combat-zone-assets
           source_dir="$(find /tmp/combat-zone-assets -type d -path '*/assets/buildings' -print -quit | sed 's#/assets/buildings$##')"

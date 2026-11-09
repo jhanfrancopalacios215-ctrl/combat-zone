@@ -24,7 +24,7 @@ try{
   await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});
   try{await page.waitForFunction(()=>window.__combatZone!==undefined,null,{timeout:18000})}catch(e){console.error('PAGE ERRORS',pageErrors);console.error('CONSOLE ERRORS',consoleErrors);console.error('FAILED REQUESTS',failedRequests);throw e}
   const check=(name,condition)=>{assert.ok(condition,name);console.log('PASS '+name)};
-  check('01 documento HTML carga',await page.title()==='COMBAT ZONE 6.8 — Distrito Gris');
+  check('01 documento HTML carga',await page.title()==='COMBAT ZONE 6.9 — Distrito Gris');
   check('02 pantalla inicial visible',await page.locator('#start').isVisible());
   check('03 botón de inicio existe',await page.locator('#play').count()===1);
   check('04 HUD de salud existe',await page.locator('#health i').count()===1);
@@ -33,7 +33,7 @@ try{
   check('07 punto de mira presente',await page.locator('#cross').count()===1);
   check('08 indicador de FPS presente',await page.locator('#fps').count()===1);
   check('09 lienzo WebGL creado',await page.locator('canvas').count()===1);
-  check('10 escena expone versión 6.8',await page.evaluate(()=>window.__combatZone.version==='6.8'));
+  check('10 escena expone versión 6.9',await page.evaluate(()=>window.__combatZone.version==='6.9'));
   check('11 ocho enemigos creados',await page.evaluate(()=>window.__combatZone.enemies===8));
   check('12 ocho enemigos activos al inicio',await page.evaluate(()=>window.__combatZone.alive===8));
   check('13 salud inicia en 100',await page.evaluate(()=>window.__combatZone.health===100));
@@ -60,9 +60,17 @@ try{
   await page.waitForTimeout(1250);
   check('25 recarga devuelve cargador a 30',await page.evaluate(()=>window.__combatZone.ammo===30));
   check('26 recarga consume reserva',await page.evaluate(()=>window.__combatZone.reserve===118));
-  check('27 los ocho enemigos conservan articulaciones animables',await page.evaluate(()=>window.__combatZone.animatedEnemies));
-  check('28 no hay excepciones JavaScript',pageErrors.length===0);
-  console.log('RESULTADO: 28/28 pruebas superadas');
+
+  check('28 articulaciones de enemigos animables',await page.evaluate(()=>window.__combatZone.animatedEnemies));
+  check('29 economía inicial de $500',await page.evaluate(()=>window.__combatZone.money===500));
+  check('30 compra de munición añade 90 balas y cuesta $100',await page.evaluate(()=>{const before=window.__combatZone.money;const ok=window.__combatZone.buyAmmo();return ok&&window.__combatZone.money===before-100}));
+  check('31 compra de botiquín recupera salud y cuesta $150',await page.evaluate(()=>{const before=window.__combatZone.money;return window.__combatZone.buyMedkit()===true&&window.__combatZone.money===before-150}));
+  check('32 dos bajas activan una estrella y dos policías',await page.evaluate(()=>{window.__combatZone.registerKill();window.__combatZone.registerKill();return window.__combatZone.wanted===1&&window.__combatZone.policeCount===2&&window.__combatZone.money===400}));
+  check('33 las bajas generan drops verdes',await page.evaluate(()=>window.__combatZone.drops===2));
+  check('34 recoger dinero suma $100',await page.evaluate(()=>{const before=window.__combatZone.money;window.__combatZone.collectDrops();return window.__combatZone.money===before+100&&window.__combatZone.drops===0}));
+  check('35 no hay excepciones JavaScript',pageErrors.length===0);
+  console.log('RESULTADO: 35/35 pruebas superadas');
+
 } finally {
   if(browser) await browser.close();
   server.close();

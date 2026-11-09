@@ -17,10 +17,12 @@ let browser;
 try{
   browser=await chromium.launch({headless:true,args:['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist']});
   const page=await browser.newPage({viewport:{width:1365,height:768}});
-  const pageErrors=[];
+  const pageErrors=[],consoleErrors=[],failedRequests=[];
   page.on('pageerror',e=>pageErrors.push(e.message));
+  page.on('console',m=>{if(m.type()==='error')consoleErrors.push(m.text())});
+  page.on('requestfailed',r=>failedRequests.push(r.url()+' :: '+r.failure()?.errorText));
   await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>window.__combatZone!==undefined,{timeout:30000});
+  try{await page.waitForFunction(()=>window.__combatZone!==undefined,null,{timeout:18000})}catch(e){console.error('PAGE ERRORS',pageErrors);console.error('CONSOLE ERRORS',consoleErrors);console.error('FAILED REQUESTS',failedRequests);throw e}
   const check=(name,condition)=>{assert.ok(condition,name);console.log('PASS '+name)};
   check('01 documento HTML carga',await page.title()==='COMBAT ZONE 6.7 — Distrito Gris');
   check('02 pantalla inicial visible',await page.locator('#start').isVisible());

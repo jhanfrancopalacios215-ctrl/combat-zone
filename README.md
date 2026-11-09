@@ -12,3 +12,9 @@ Prototipo FPS 3D para navegador.
 ## Publicación
 El sitio se publica con GitHub Pages mediante GitHub Actions.
 Este prototipo requiere conexión a internet para cargar Three.js desde jsDelivr.
+
+## Modelos 3D
+Para que GitHub Pages muestre los edificios, vehículos, armas y personajes 3D, añade el archivo
+`COMBAT_ZONE_6_6_REPARADO_2.zip` a la raíz del repositorio (botón **Add file → Upload files**).
+No lo descomprimas. El workflow lo extrae automáticamente en cada publicación.
+Si el ZIP no está presente, la publicación se detendrá con un error claro en Actions.

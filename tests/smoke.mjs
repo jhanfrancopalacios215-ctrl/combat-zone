@@ -8,7 +8,7 @@ const root=process.cwd();
 const mime={'.html':'text/html','.js':'text/javascript','.mjs':'text/javascript','.glb':'model/gltf-binary','.obj':'text/plain','.mtl':'text/plain','.png':'image/png','.jpg':'image/jpeg','.webp':'image/webp'};
 const server=http.createServer((req,res)=>{
   const pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
-  const file=path.resolve(root,'.'+pathname);
+  const file=path.resolve(root,pathname==='/'?'index.html':'.'+pathname);
   if(!file.startsWith(root)){res.writeHead(403).end();return}
   fs.readFile(file,(err,data)=>{if(err){res.writeHead(404).end('not found');return}res.writeHead(200,{'content-type':mime[path.extname(file)]||'application/octet-stream'});res.end(data)});
 });

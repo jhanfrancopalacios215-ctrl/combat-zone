@@ -23,6 +23,25 @@ jobs:
         uses: actions/configure-pages@v5
         with:
           enablement: true
+      - name: Install 3D models from the supplied asset pack
+        shell: bash
+        run: |
+          archive="COMBAT_ZONE_6_6_REPARADO_2.zip"
+          if [ ! -f "$archive" ]; then
+            echo "::error::Falta $archive en la raíz del repositorio. Súbelo desde Add file > Upload files."
+            exit 1
+          fi
+          mkdir -p /tmp/combat-zone-assets
+          unzip -q "$archive" -d /tmp/combat-zone-assets
+          source_dir="$(find /tmp/combat-zone-assets -type d -path '*/assets/buildings' -print -quit | sed 's#/assets/buildings$##')"
+          if [ -z "$source_dir" ] || [ ! -d "$source_dir/assets/vehicles" ] || [ ! -d "$source_dir/assets/weapons" ] || [ ! -d "$source_dir/assets/characters" ]; then
+            echo "::error::El ZIP no contiene todas las carpetas de modelos requeridas."
+            exit 1
+          fi
+          rm -rf assets
+          cp -a "$source_dir/assets" ./assets
+          echo "Modelos instalados:"
+          find assets -type f | wc -l
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:

@@ -55,7 +55,7 @@ jobs:
         run: |
           npm install --no-save playwright
           npx playwright install --with-deps chromium
-      - name: Run 27 browser smoke tests
+      - name: Run 35 browser smoke tests
         run: node tests/smoke.mjs
       - name: Upload site
         uses: actions/upload-pages-artifact@v3

@@ -64,8 +64,8 @@ try{
   check('28 articulaciones de enemigos animables',await page.evaluate(()=>window.__combatZone.animatedEnemies));
   check('29 economía inicial de $500',await page.evaluate(()=>window.__combatZone.money===500));
   check('30 compra de munición añade 90 balas y cuesta $100',await page.evaluate(()=>{const before=window.__combatZone.money;const ok=window.__combatZone.buyAmmo();return ok&&window.__combatZone.money===before-100}));
-  check('31 compra de botiquín recupera salud y cuesta $150',await page.evaluate(()=>{const before=window.__combatZone.money;return window.__combatZone.buyMedkit()===true&&window.__combatZone.money===before-150}));
-  check('32 dos bajas activan una estrella y dos policías',await page.evaluate(()=>{window.__combatZone.registerKill();window.__combatZone.registerKill();return window.__combatZone.wanted===1&&window.__combatZone.policeCount===2&&window.__combatZone.money===400}));
+  check('31 compra de botiquín recupera salud y cuesta $150',await page.evaluate(()=>{window.__combatZone.damageForTest();const before=window.__combatZone.money;return window.__combatZone.buyMedkit()===true&&window.__combatZone.money===before-150}));
+  check('32 dos bajas activan una estrella y dos policías',await page.evaluate(()=>{window.__combatZone.registerKill();window.__combatZone.registerKill();return window.__combatZone.wanted===1&&window.__combatZone.policeCount===2&&window.__combatZone.money===350}));
   check('33 las bajas generan drops verdes',await page.evaluate(()=>window.__combatZone.drops===2));
   check('34 recoger dinero suma $100',await page.evaluate(()=>{const before=window.__combatZone.money;window.__combatZone.collectDrops();return window.__combatZone.money===before+100&&window.__combatZone.drops===0}));
   check('35 no hay excepciones JavaScript',pageErrors.length===0);

@@ -1,17 +1,20 @@
-# COMBAT ZONE 8.0
+# COMBAT ZONE 8.1
 Shooter 3D en primera persona para navegador, hecho con Three.js en un solo `index.html`.
 
 ## Cómo se juega
 1. **Distrito Gris:** limpia la calle de 8 hostiles. Cada baja sube tu nivel de búsqueda y llega la policía.
-2. **Operación Arena:** al asegurar el distrito te extraen a la Arena, una plaza con coberturas rodeada de ciudad. Resiste oleadas cada vez más duras; entre oleadas hay 5 s de descanso y una prima en efectivo.
+2. **Operación Arena:** al asegurar el distrito te extraen a la Arena, una plaza con coberturas rodeada de ciudad. Resiste 10 oleadas; en la última llega el **Comandante**, que lanza granadas. Al vencerlo: misión cumplida.
+3. **Tienda (B)** entre oleadas (15 s): armas, chaleco antibalas, granadas y mejoras de daño y cargador. Empiezas solo con M16 y Magnum.
+
+Tu récord se guarda en el navegador y puedes compartir el resultado al terminar.
 
 ## Controles
 - WASD: moverse · Ratón o flechas: mirar · Shift: correr · C: agacharse · Espacio: saltar (sube a coberturas bajas)
 - Clic izquierdo: disparar · Clic derecho: apuntar (mira telescópica en el francotirador) · R: recargar
-- 1–8 o rueda: cambiar de arma · F: munición ($100) · H: botiquín ($150) · Esc: pausa
+- 1–8 o rueda: cambiar de arma · G: granada · B: tienda (entre oleadas) · F: munición ($100) · H: botiquín ($150) · Esc: pausa
 
 ## Ajustes
-Sensibilidad, volumen, campo de visión, calidad gráfica (automática, baja, media, alta), invertir eje Y y mostrar FPS. Se guardan en el navegador.
+Sensibilidad, volumen, campo de visión, calidad gráfica (automática, baja, media, alta), invertir eje Y, mostrar FPS y mostrar consejos. Se guardan en el navegador.
 
 ## Técnica
 - Three.js 0.160 desde jsDelivr. Necesita conexión a internet.

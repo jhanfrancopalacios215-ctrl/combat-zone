@@ -1,4 +1,4 @@
-// Pruebas automáticas de COMBAT ZONE 8.0 (Playwright + Chromium sin pantalla).
+// Pruebas automáticas de COMBAT ZONE 8.1 (Playwright + Chromium sin pantalla).
 // Se ejecutan con: node tests/smoke.mjs  (desde la raíz del repositorio)
 import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
@@ -46,8 +46,8 @@ try {
   const cz = (expr, arg) => page.evaluate(expr, arg);
 
   // --- Carga y menús ---
-  check('01 título de la página', await page.title() === 'COMBAT ZONE 8.0 — Operación Distrito Gris');
-  check('02 versión 8.0 expuesta', await cz(() => window.__cz.version === '8.0'));
+  check('01 título de la página', await page.title() === 'COMBAT ZONE 8.1 — Operación Distrito Gris');
+  check('02 versión 8.1 expuesta', await cz(() => window.__cz.version === '8.1'));
   await page.waitForSelector('#mainMenu:not(.hidden)', { timeout: 5000 });
   check('03 menú principal visible tras la carga', await page.locator('#mainMenu').isVisible() && !(await page.locator('#loading').isVisible()));
   check('04 botones del menú principal', await page.locator('#btnPlay').count() === 1 && await page.locator('#btnSettings').count() === 1 && await page.locator('#btnControls').count() === 1);
@@ -83,7 +83,8 @@ try {
   check('22 respeta la cadencia del arma', await cz(async () => { const z = window.__cz; await new Promise(r => setTimeout(r, 150)); const a = z.fire(), b = z.fire(); return a === true && b === false; }));
   check('23 segundo disparo tras la cadencia', await cz(() => window.__cz.ammo === 28));
   check('24 disparar a la calle deja marcas de impacto', await until(page, () => window.__cz.decals > 0, null, 3000));
-  await cz(() => window.__cz.selectWeapon(2));
+  check('25a al empezar solo tienes M16 y Magnum', await cz(() => { const o = window.__cz.owned; return o[0] && o[5] && !o[2] && window.__cz.selectWeapon(2) === false && window.__cz.weaponName === 'M16'; }));
+  await cz(() => { window.__cz.unlockAll(); window.__cz.selectWeapon(2); });
   check('25 francotirador: aviso y cargador de 5', (await page.locator('#toast').textContent()).includes('FRANCOTIRADOR') && await cz(() => window.__cz.magazine === 5));
   check('26 Magnum con 6 balas y RPG con 1', await cz(() => { const z = window.__cz; z.selectWeapon(5); const a = z.magazine === 6 && z.weaponName === 'Magnum .44'; z.selectWeapon(6); const b = z.magazine === 1 && z.weaponName === 'RPG-7'; return a && b; }));
   await cz(() => window.__cz.selectWeapon(0));
@@ -93,6 +94,7 @@ try {
   check('28 la recarga llena el cargador y gasta reserva', await until(page, () => window.__cz.ammo === 30 && window.__cz.reserve === 118, null, 4000));
   check('29 comprar munición: +90 por $100', await cz(() => { const z = window.__cz, m = z.money, r = z.reserve; return z.buyAmmo() && z.money === m - 100 && z.reserve === r + 90; }));
   check('30 comprar botiquín cura y cuesta $150', await cz(() => { const z = window.__cz; z.damage(30); const m = z.money; return z.buyMedkit() && z.money === m - 150 && z.health === 100; }));
+  check('31a lanzar granada (G) gasta una y explota', await cz(() => { const z = window.__cz, n = z.grenades; return z.throwGrenade() && z.grenades === n - 1 && z.grenadesLive === 1; }) && await until(page, () => window.__cz.grenadesLive === 0, null, 15000));
   check('31 el salto eleva al jugador', await cz(() => { window.__cz.jump(); return true; }) && await until(page, () => window.__cz.playerY > .2, null, 3000));
 
   // --- Bajas, dinero y policía ---
@@ -124,7 +126,23 @@ try {
   check('45 la oleada genera hostiles', await until(page, () => window.__cz.hostilesAlive > 0, null, 25000));
   check('46 el HUD muestra la oleada', (await page.locator('#objTitle').innerText()).includes('OLEADA 1'));
   check('47 al vaciar la oleada hay descanso', await until(page, () => { window.__cz.heal(); window.__cz.killOne(); return window.__cz.intermission > 0; }, null, 60000));
+  check('47a el HUD indica 1 / 10 oleadas', (await page.locator('#objTitle').innerText()).includes('1 / 10'));
+  await page.keyboard.press('KeyB');
+  check('47b la tecla B abre la tienda', await until(page, () => window.__cz.state === 'shop', null, 3000) && await page.locator('#shopMenu').isVisible());
+  check('47c la tienda muestra armas y mejoras', await page.locator('#shopItems .item').count() >= 12);
+  check('47d comprar chaleco protege', await cz(() => { const z = window.__cz; z.collectAll(); return z.buy('armor') && z.armor === 50; }));
+  check('47e el chaleco absorbe daño', await cz(() => { const z = window.__cz; z.closeShop(); z.heal(); z.damage(20); return z.health === 92 && z.armor === 38; }));
+  check('47f comprar mejora de cargador amplía el M16', await cz(() => { const z = window.__cz; z.selectWeapon(0); window.__czMoney = z.money; return true; }) && await cz(() => { const z = window.__cz; z.openShop(); const ok = z.buy('mag'); z.closeShop(); return !ok || z.magazine === 38; }));
+  await cz(() => window.__cz.skipIntermission());
   check('48 tras el descanso empieza la oleada 2', await until(page, () => { window.__cz.heal(); return window.__cz.wave === 2; }, null, 40000));
+  await cz(() => { window.__cz.killAll(); window.__cz.jumpToWave(10); });
+  check('48a la oleada 10 trae al Comandante', await until(page, () => { window.__cz.heal(); return window.__cz.wave === 10 && window.__cz.bossAlive; }, null, 20000) && await page.locator('#bossBox').isVisible());
+  await cz(() => window.__cz.killAll());
+  check('48b vencer la oleada final da la victoria', await until(page, () => { window.__cz.heal(); window.__cz.killAll(); return !document.querySelector('#resultsMenu').classList.contains('hidden'); }, null, 30000) && (await page.locator('#resTitle').innerText()).includes('MISIÓN CUMPLIDA'));
+  check('48c se guarda el récord', await cz(() => window.__cz.best.score > 0 && window.__cz.best.wins === 1) && await page.locator('#resRecord').isVisible());
+  check('48d botón de compartir', await page.locator('#btnShare').isVisible());
+  await page.click('#btnRetry');
+  check('48e reintentar devuelve las armas iniciales', await cz(() => window.__cz.state === 'playing' && window.__cz.owned.filter(Boolean).length === 2 && window.__cz.grenades === 2 && window.__cz.armor === 0));
 
   // --- Derrota, resultados y reinicio ---
   await cz(() => window.__cz.damage(500));
@@ -135,9 +153,10 @@ try {
   check('51 salir al menú principal', await page.locator('#mainMenu').isVisible() && await cz(() => window.__cz.state === 'menu'));
   await page.setViewportSize({ width: 390, height: 844 });
   check('52 el menú cabe en móvil', await page.locator('#btnPlay').isVisible());
+  check('52a el menú muestra el récord', (await page.locator('#bestLine').innerText()).includes('Récord'));
   check('53 no hay excepciones JavaScript', pageErrors.length === 0);
   if (pageErrors.length) console.error(pageErrors);
-  console.log(`RESULTADO: ${passed}/53 pruebas superadas`);
+  console.log(`RESULTADO: ${passed} pruebas superadas`);
 } finally {
   if (browser) await browser.close();
   server.close();

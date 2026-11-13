@@ -1,0 +1,30 @@
+# Infraestructura de la clasificación mundial de COMBAT ZONE en Render.
+# La base Postgres gratuita caduca a los 30 días de crearse (luego 14 días de gracia para pasar a pago).
+databases:
+  - name: combat-zone-db
+    plan: free
+    region: virginia
+    postgresMajorVersion: "16"
+
+services:
+  - type: web
+    name: combat-zone-api
+    runtime: node
+    plan: free
+    region: virginia
+    rootDir: server
+    buildCommand: npm ci --omit=dev
+    startCommand: node index.js
+    healthCheckPath: /health
+    buildFilter:
+      paths:
+        - server/**
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: combat-zone-db
+          property: connectionString
+      - key: ALLOWED_ORIGINS
+        value: https://jhanfrancopalacios215-ctrl.github.io
+      - key: NODE_VERSION
+        value: "20"

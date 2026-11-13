@@ -300,7 +300,7 @@ body.touch #team{top:178px;width:150px}
 
 <script>
 (function(){function showErr(msg){var c=document.querySelector('#loading .card');if(!c||document.querySelector('#loading').classList.contains('hidden'))return;var p=document.getElementById('bootErr');if(!p){p=document.createElement('p');p.id='bootErr';p.style.cssText='color:#ffb39e;font-size:13px;margin-top:14px;user-select:text;-webkit-user-select:text;word-break:break-word';c.appendChild(p)}p.textContent='No se pudo iniciar el juego: '+msg+' · Prueba a recargar con Ctrl + F5 o usa otro navegador (Chrome o Edge).'}
-window.addEventListener('error',function(e){showErr((e.message||'error')+(e.filename?' ('+e.filename.split('/').pop()+':'+e.lineno+')':''))});
+window.addEventListener('error',function(e){if(String(e.message).indexOf('WebGL no disponible')>=0)return;showErr((e.message||'error')+(e.filename?' ('+e.filename.split('/').pop()+':'+e.lineno+')':''))});
 window.addEventListener('unhandledrejection',function(e){showErr(String(e.reason&&e.reason.message||e.reason))});
 setTimeout(function(){if(!window.__cz)showErr('la carga tardó demasiado (¿conexión lenta o sin acceso a cdn.jsdelivr.net?)')},25000)})();
 </script>
@@ -342,6 +342,7 @@ let renderScale=settings.quality==='auto'?(lowEnd?.65:.85):Q().scale;
 /* =====================================================================
    2. RENDER, ESCENA, CÁMARA, LUZ Y CIELO
    ===================================================================== */
+(()=>{let ok=false;try{const c=document.createElement('canvas');ok=!!(c.getContext('webgl2')||c.getContext('webgl'))}catch(e){}if(!ok){const card=document.querySelector('#loading .card');card.innerHTML='<h1 class="brand">COMBAT <span>ZONE</span></h1><div class="sub">Tu navegador no tiene los gráficos 3D (WebGL) activados</div><p>Para jugar, actívalos así:</p><p><b>Chrome:</b> abre <code>chrome://settings/system</code>, activa «Usar aceleración de gráficos cuando esté disponible» y pulsa Reiniciar.<br><b>Edge:</b> abre <code>edge://settings/system</code> y activa «Usar aceleración de gráficos cuando esté disponible».</p><p>Si ya está activado, actualiza el controlador de tu tarjeta gráfica o prueba con otro navegador. En <code>chrome://gpu</code> puedes ver si WebGL aparece como disponible.</p>';throw new Error('WebGL no disponible')}})();
 const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance'});
 renderer.domElement.id='view';renderer.setPixelRatio(1);renderer.shadowMap.enabled=false;renderer.outputColorSpace=THREE.SRGBColorSpace;
 document.body.prepend(renderer.domElement);

@@ -1,6 +1,7 @@
 // Servidor de la clasificación mundial de COMBAT ZONE.
 // Sin dependencias salvo "pg". Si no hay DATABASE_URL guarda en memoria (para pruebas locales).
 import http from 'node:http';
+import { attachRooms } from './rooms.js';
 
 const PORT = Number(process.env.PORT) || 8787;
 const ORIGINS = (process.env.ALLOWED_ORIGINS || 'https://jhanfrancopalacios215-ctrl.github.io').split(',').map(s => s.trim()).filter(Boolean);
@@ -104,7 +105,7 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
   try {
     if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
-    if (req.method === 'GET' && url.pathname === '/health') return send(res, 200, { ok: true, db: !!db });
+    if (req.method === 'GET' && url.pathname === '/health') return send(res, 200, { ok: true, db: !!db, coop: true });
     if (req.method === 'GET' && url.pathname === '/api/scores') {
       const period = url.searchParams.get('period') === 'today' ? 'today' : 'all';
       const day = period === 'today' ? (dayOk(url.searchParams.get('day') || '') ? url.searchParams.get('day') : today()) : null;
@@ -125,4 +126,5 @@ const server = http.createServer(async (req, res) => {
     send(res, 500, { ok: false, error: 'error del servidor' });
   }
 });
+attachRooms(server, { origins: ORIGINS });
 server.listen(PORT, () => console.log(`combat-zone-api escuchando en ${PORT} (${db ? 'Postgres' : 'memoria'})`));

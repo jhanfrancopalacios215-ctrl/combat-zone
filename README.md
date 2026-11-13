@@ -1,4 +1,4 @@
-# COMBAT ZONE 8.3
+# COMBAT ZONE 9.0
 Shooter 3D en primera persona para navegador, hecho con Three.js en un solo `index.html`.
 
 ## Mapas
@@ -16,6 +16,11 @@ Tu récord se guarda en el navegador y puedes compartir el resultado al terminar
 - WASD: moverse · Ratón o flechas: mirar · Shift: correr · C: agacharse · Espacio: saltar (sube a coberturas bajas)
 - Clic izquierdo: disparar · Clic derecho: apuntar (mira telescópica en el francotirador) · R: recargar
 - 1–8 o rueda: cambiar de arma · G: granada · B: tienda (entre oleadas) · F: munición ($100) · H: botiquín ($150) · Esc: pausa
+
+## Cooperativo online
+- En el menú, **Cooperativo online**: crea una sala y comparte el código de 4 letras o el enlace de invitación (`?sala=ABCD`). De 2 a 4 jugadores.
+- Se juega en la Arena: 10 oleadas y el Comandante. Cada baja la cobra quien la hace. Si caes, vuelves con 60 de salud al empezar la siguiente oleada; la partida termina si cae todo el equipo.
+- El navegador del anfitrión simula enemigos y oleadas y envía instantáneas 10 veces por segundo; el servidor (`server/rooms.js`, WebSocket en `/ws`) solo reparte los mensajes. Si el anfitrión sale, la sala se cierra.
 
 ## Clasificación mundial y retos diarios
 - Al terminar una partida puedes escribir tu nombre y publicar tu puntuación. En el menú, **Clasificación mundial** muestra la tabla de siempre y la de hoy.

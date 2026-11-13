@@ -1,4 +1,4 @@
-// Pruebas automáticas de COMBAT ZONE 8.3 (Playwright + Chromium sin pantalla).
+// Pruebas automáticas de COMBAT ZONE 9.0 (Playwright + Chromium sin pantalla).
 // Se ejecutan con: node tests/smoke.mjs  (desde la raíz del repositorio)
 import { chromium, devices } from 'playwright';
 import assert from 'node:assert/strict';
@@ -52,8 +52,8 @@ try {
   const cz = (expr, arg) => page.evaluate(expr, arg);
 
   // --- Carga y menús ---
-  check('01 título de la página', await page.title() === 'COMBAT ZONE 8.3 — Operación Distrito Gris');
-  check('02 versión 8.3 expuesta', await cz(() => window.__cz.version === '8.3'));
+  check('01 título de la página', await page.title() === 'COMBAT ZONE 9.0 — Operación Distrito Gris');
+  check('02 versión 9.0 expuesta', await cz(() => window.__cz.version === '9.0'));
   check('02a el menú muestra el reto de hoy', (await page.locator('#dailyLine').innerText()).includes('RETO DE HOY'));
   await page.waitForSelector('#mainMenu:not(.hidden)', { timeout: 5000 });
   check('03 menú principal visible tras la carga', await page.locator('#mainMenu').isVisible() && !(await page.locator('#loading').isVisible()));
@@ -201,6 +201,36 @@ try {
   check('62 el botón R recarga', await until(m, () => window.__cz.reloading || window.__cz.ammo === 30, null, 3000));
   check('63 los consejos hablan de controles táctiles', await until(m, () => document.querySelector('#hint').textContent.includes('Joystick'), null, 15000));
   await mctx.close();
+
+  // --- Cooperativo online: dos jugadores en navegadores distintos ---
+  const noLock = () => { Element.prototype.requestPointerLock = function () { return Promise.reject(new Error('sin pantalla')); }; };
+  const hctx = await browser.newContext({ viewport: { width: 960, height: 540 } }), gctx = await browser.newContext({ viewport: { width: 960, height: 540 } });
+  await hctx.addInitScript(noLock); await gctx.addInitScript(noLock);
+  const H = await hctx.newPage(), Gp = await gctx.newPage();
+  H.on('pageerror', e => pageErrors.push('anfitrión: ' + e.message)); Gp.on('pageerror', e => pageErrors.push('invitado: ' + e.message));
+  await H.goto(GAME); await H.waitForFunction(() => window.__cz && window.__cz.state === 'menu', null, { timeout: 40000 });
+  await H.waitForSelector('#mainMenu:not(.hidden)');
+  await H.click('#btnCoop'); await H.fill('#cName', 'Anfitrion'); await H.click('#btnCreate');
+  check('64 crear sala da un código de 4 letras', await until(H, () => /^[A-Z]{4}$/.test(window.__cz.roomCode), null, 15000) && await H.locator('#coopLobby').isVisible());
+  const code = await H.evaluate(() => window.__cz.roomCode);
+  await Gp.goto(GAME + '&sala=' + code); await Gp.waitForFunction(() => window.__cz && window.__cz.state === 'menu', null, { timeout: 40000 });
+  check('65 el enlace de invitación abre la sala con el código', await until(Gp, (c) => document.querySelector('#cCode').value === c && !document.querySelector('#coopMenu').classList.contains('hidden'), code, 5000));
+  await Gp.fill('#cName', 'Invitado'); await Gp.click('#btnJoin');
+  check('66 el anfitrión ve a los 2 jugadores en la sala', await until(H, () => document.querySelectorAll('#lobbyList .lp').length === 2, null, 15000));
+  await H.click('#btnCoopStart');
+  check('67 la partida empieza para los dos en la Arena', await until(H, () => window.__cz.coop && window.__cz.zone === 'arena', null, 15000) && await until(Gp, () => window.__cz.coop && window.__cz.zone === 'arena', null, 15000));
+  check('68 cada uno ve a su compañero', await until(H, () => { window.__cz.heal(); return window.__cz.remoteCount === 1; }, null, 20000) && await until(Gp, () => { window.__cz.heal(); return window.__cz.remoteCount === 1; }, null, 20000));
+  check('69 el invitado recibe los enemigos del anfitrión', await until(Gp, () => { window.__cz.heal(); return window.__cz.replicas > 0; }, null, 45000));
+  await H.evaluate(() => window.__cz.heal());
+  const kBefore = await Gp.evaluate(() => window.__cz.kills);
+  await Gp.evaluate(() => window.__cz.netKillOne());
+  check('70 la baja del invitado se cuenta en su marcador', await until(Gp, (k) => { window.__cz.heal(); return window.__cz.kills > k; }, kBefore, 20000));
+  check('70a el equipo aparece en el HUD', await until(Gp, () => document.querySelectorAll('#team .tm').length === 2, null, 10000));
+  await Gp.evaluate(() => window.__cz.damage(500));
+  check('71 caer en cooperativo no acaba la partida', await Gp.evaluate(() => window.__cz.dead && window.__cz.state === 'playing'));
+  await Gp.evaluate(() => window.__cz.quit());
+  check('72 si un compañero sale, el anfitrión deja de verlo', await until(H, () => { window.__cz.heal(); return window.__cz.remoteCount === 0; }, null, 15000));
+  await hctx.close(); await gctx.close();
 
   check('53 no hay excepciones JavaScript', pageErrors.length === 0);
   if (pageErrors.length) console.error(pageErrors);

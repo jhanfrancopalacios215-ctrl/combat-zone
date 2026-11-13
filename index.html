@@ -298,6 +298,12 @@ body.touch #team{top:178px;width:150px}
   <div class="menu"><button class="btn" id="btnCoopBack">Salir</button></div>
 </div></div>
 
+<script>
+(function(){function showErr(msg){var c=document.querySelector('#loading .card');if(!c||document.querySelector('#loading').classList.contains('hidden'))return;var p=document.getElementById('bootErr');if(!p){p=document.createElement('p');p.id='bootErr';p.style.cssText='color:#ffb39e;font-size:13px;margin-top:14px;user-select:text;-webkit-user-select:text;word-break:break-word';c.appendChild(p)}p.textContent='No se pudo iniciar el juego: '+msg+' · Prueba a recargar con Ctrl + F5 o usa otro navegador (Chrome o Edge).'}
+window.addEventListener('error',function(e){showErr((e.message||'error')+(e.filename?' ('+e.filename.split('/').pop()+':'+e.lineno+')':''))});
+window.addEventListener('unhandledrejection',function(e){showErr(String(e.reason&&e.reason.message||e.reason))});
+setTimeout(function(){if(!window.__cz)showErr('la carga tardó demasiado (¿conexión lenta o sin acceso a cdn.jsdelivr.net?)')},25000)})();
+</script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 <script type="module">
 import * as THREE from 'three';

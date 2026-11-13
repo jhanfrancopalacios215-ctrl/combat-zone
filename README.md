@@ -1,4 +1,4 @@
-# COMBAT ZONE 8.2
+# COMBAT ZONE 8.3
 Shooter 3D en primera persona para navegador, hecho con Three.js en un solo `index.html`.
 
 ## Mapas
@@ -16,6 +16,12 @@ Tu récord se guarda en el navegador y puedes compartir el resultado al terminar
 - WASD: moverse · Ratón o flechas: mirar · Shift: correr · C: agacharse · Espacio: saltar (sube a coberturas bajas)
 - Clic izquierdo: disparar · Clic derecho: apuntar (mira telescópica en el francotirador) · R: recargar
 - 1–8 o rueda: cambiar de arma · G: granada · B: tienda (entre oleadas) · F: munición ($100) · H: botiquín ($150) · Esc: pausa
+
+## Clasificación mundial y retos diarios
+- Al terminar una partida puedes escribir tu nombre y publicar tu puntuación. En el menú, **Clasificación mundial** muestra la tabla de siempre y la de hoy.
+- Cada día hay un **reto diario** distinto (tiros a la cabeza, granadas, oleadas…). Completarlo da +300 puntos y $300.
+- El servidor está en `server/` (Node + Postgres) y se publica en Render con `render.yaml`. Pruebas del servidor: `node server/test.mjs`.
+- **Importante:** la base Postgres gratuita de Render caduca a los 30 días de crearse (creada el 13/11/2026). Después hay 14 días para pasarla a un plan de pago; si no, se borra la tabla.
 
 ## Celular
 En teléfonos y tabletas aparecen controles táctiles: joystick a la izquierda, deslizar a la derecha para mirar y botones FUEGO (se puede arrastrar para apuntar), MIRA, SALTO, R, AGACH., GRAN., ARMA y TIENDA. Se juega en horizontal.

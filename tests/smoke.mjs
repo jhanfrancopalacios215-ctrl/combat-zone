@@ -1,10 +1,11 @@
-// Pruebas automáticas de COMBAT ZONE 8.2 (Playwright + Chromium sin pantalla).
+// Pruebas automáticas de COMBAT ZONE 8.3 (Playwright + Chromium sin pantalla).
 // Se ejecutan con: node tests/smoke.mjs  (desde la raíz del repositorio)
 import { chromium, devices } from 'playwright';
 import assert from 'node:assert/strict';
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawn } from 'node:child_process';
 
 const root = process.cwd();
 const mime = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.glb': 'model/gltf-binary', '.png': 'image/png' };
@@ -19,6 +20,11 @@ const server = http.createServer((req, res) => {
   });
 });
 await new Promise(resolve => server.listen(4173, '127.0.0.1', resolve));
+// servidor de récords en memoria, el mismo código que corre en Render
+const apiEnv = { ...process.env, PORT: '8797' }; delete apiEnv.DATABASE_URL;
+const apiProc = spawn(process.execPath, [path.join(root, 'server', 'index.js')], { env: apiEnv, stdio: ['ignore', 'pipe', 'inherit'] });
+await new Promise(r => apiProc.stdout.once('data', r));
+const GAME = 'http://127.0.0.1:4173/?api=http://127.0.0.1:8797';
 
 let browser, passed = 0;
 const check = (name, condition) => { assert.ok(condition, name); passed++; console.log('PASS ' + name); };
@@ -40,14 +46,15 @@ try {
   page.on('console', m => { if (m.type() === 'error') consoleErrors.push(m.text()); });
   // El navegador sin pantalla no puede capturar el ratón: así se prueba también el modo de respaldo.
   await page.addInitScript(() => { Element.prototype.requestPointerLock = function () { return Promise.reject(new Error('sin pantalla')); }; });
-  await page.goto('http://127.0.0.1:4173/', { waitUntil: 'domcontentloaded' });
+  await page.goto(GAME, { waitUntil: 'domcontentloaded' });
   try { await page.waitForFunction(() => window.__cz && window.__cz.state === 'menu', null, { timeout: 30000 }); }
   catch (e) { console.error('PAGE ERRORS', pageErrors); console.error('CONSOLE ERRORS', consoleErrors); throw e; }
   const cz = (expr, arg) => page.evaluate(expr, arg);
 
   // --- Carga y menús ---
-  check('01 título de la página', await page.title() === 'COMBAT ZONE 8.2 — Operación Distrito Gris');
-  check('02 versión 8.2 expuesta', await cz(() => window.__cz.version === '8.2'));
+  check('01 título de la página', await page.title() === 'COMBAT ZONE 8.3 — Operación Distrito Gris');
+  check('02 versión 8.3 expuesta', await cz(() => window.__cz.version === '8.3'));
+  check('02a el menú muestra el reto de hoy', (await page.locator('#dailyLine').innerText()).includes('RETO DE HOY'));
   await page.waitForSelector('#mainMenu:not(.hidden)', { timeout: 5000 });
   check('03 menú principal visible tras la carga', await page.locator('#mainMenu').isVisible() && !(await page.locator('#loading').isVisible()));
   check('04 botones del menú principal', await page.locator('#btnPlay').count() === 1 && await page.locator('#btnSettings').count() === 1 && await page.locator('#btnControls').count() === 1);
@@ -141,6 +148,14 @@ try {
   check('48b vencer la oleada final da la victoria', await until(page, () => { window.__cz.heal(); window.__cz.killAll(); return !document.querySelector('#resultsMenu').classList.contains('hidden'); }, null, 30000) && (await page.locator('#resTitle').innerText()).includes('MISIÓN CUMPLIDA'));
   check('48c se guarda el récord', await cz(() => window.__cz.best.score > 0 && window.__cz.best.wins === 1) && await page.locator('#resRecord').isVisible());
   check('48d botón de compartir', await page.locator('#btnShare').isVisible());
+  await page.fill('#pName', 'Tester');
+  await page.click('#btnPublish');
+  check('48f publicar en la clasificación da tu puesto', await until(page, () => document.querySelector('#pubStatus').textContent.includes('Puesto'), null, 15000));
+  await page.click('#btnResBoard');
+  check('48g la tabla mundial muestra tu puntuación', await until(page, () => document.querySelectorAll('#boardList .row.me').length === 1, null, 15000));
+  await page.click('[data-period="today"]');
+  check('48h la tabla de hoy funciona', await until(page, () => document.querySelectorAll('#boardList .row').length >= 1, null, 15000));
+  await page.click('#btnBoardBack');
   await page.click('#btnRetry');
   check('48e reintentar devuelve las armas iniciales', await cz(() => window.__cz.state === 'playing' && window.__cz.owned.filter(Boolean).length === 2 && window.__cz.grenades === 2 && window.__cz.armor === 0));
 
@@ -155,6 +170,7 @@ try {
   check('52 el menú cabe en móvil', await page.locator('#btnPlay').isVisible());
   // --- Mapa Centro de Lima ---
   await page.setViewportSize({ width: 1280, height: 720 });
+  await cz(() => window.__cz.setDaily('lima'));
   await page.click('[data-map="lima"]');
   check('54 se puede elegir el mapa Centro de Lima', await cz(() => window.__cz.mapId === 'lima') && await page.locator('[data-map="lima"].on').count() === 1);
   await page.click('#btnPlay');
@@ -162,6 +178,7 @@ try {
   check('56 el título del objetivo dice CENTRO DE LIMA', (await page.locator('#objTitle').innerText()).includes('CENTRO DE LIMA'));
   await cz(() => { window.__cz.heal(); for (let i = 0; i < 8; i++) window.__cz.killOne(); });
   check('57 desde Lima también se llega a la Arena', await until(page, () => { window.__cz.heal(); return window.__cz.zone === 'arena'; }, null, 20000));
+  check('57a se completa el reto diario (asegurar Lima)', await until(page, () => window.__cz.daily.done && window.__cz.daily.thisMatch, null, 8000));
   await cz(() => { window.__cz.quit(); window.__cz.setMap('gris'); });
   await page.setViewportSize({ width: 390, height: 844 });
   check('52a el menú muestra el récord', (await page.locator('#bestLine').innerText()).includes('Récord'));
@@ -169,7 +186,7 @@ try {
   const mctx = await browser.newContext({ ...devices['Pixel 7 landscape'] });
   const m = await mctx.newPage();
   m.on('pageerror', e => pageErrors.push('móvil: ' + e.message));
-  await m.goto('http://127.0.0.1:4173/', { waitUntil: 'domcontentloaded' });
+  await m.goto(GAME, { waitUntil: 'domcontentloaded' });
   await m.waitForFunction(() => window.__cz && window.__cz.state === 'menu', null, { timeout: 40000 });
   check('58 en el celular se activa el modo táctil', await m.evaluate(() => window.__cz.touchMode === true) && (await m.locator('#touchWarn').innerText()).includes('joystick'));
   await m.tap('#btnPlay');
@@ -191,4 +208,5 @@ try {
 } finally {
   if (browser) await browser.close();
   server.close();
+  apiProc.kill();
 }

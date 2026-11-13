@@ -1,5 +1,9 @@
-# COMBAT ZONE 8.1
+# COMBAT ZONE 8.2
 Shooter 3D en primera persona para navegador, hecho con Three.js en un solo `index.html`.
+
+## Mapas
+- **Distrito Gris:** calle urbana con rascacielos.
+- **Centro de Lima:** fachadas coloniales de colores con balcones de cajón, combis, mototaxis, carretillas de fruta, cables cruzando la calle, la iglesia al fondo, cielo gris y garúa.
 
 ## Cómo se juega
 1. **Distrito Gris:** limpia la calle de 8 hostiles. Cada baja sube tu nivel de búsqueda y llega la policía.
@@ -12,6 +16,9 @@ Tu récord se guarda en el navegador y puedes compartir el resultado al terminar
 - WASD: moverse · Ratón o flechas: mirar · Shift: correr · C: agacharse · Espacio: saltar (sube a coberturas bajas)
 - Clic izquierdo: disparar · Clic derecho: apuntar (mira telescópica en el francotirador) · R: recargar
 - 1–8 o rueda: cambiar de arma · G: granada · B: tienda (entre oleadas) · F: munición ($100) · H: botiquín ($150) · Esc: pausa
+
+## Celular
+En teléfonos y tabletas aparecen controles táctiles: joystick a la izquierda, deslizar a la derecha para mirar y botones FUEGO (se puede arrastrar para apuntar), MIRA, SALTO, R, AGACH., GRAN., ARMA y TIENDA. Se juega en horizontal.
 
 ## Ajustes
 Sensibilidad, volumen, campo de visión, calidad gráfica (automática, baja, media, alta), invertir eje Y, mostrar FPS y mostrar consejos. Se guardan en el navegador.

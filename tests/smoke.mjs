@@ -1,6 +1,6 @@
-// Pruebas automáticas de COMBAT ZONE 8.1 (Playwright + Chromium sin pantalla).
+// Pruebas automáticas de COMBAT ZONE 8.2 (Playwright + Chromium sin pantalla).
 // Se ejecutan con: node tests/smoke.mjs  (desde la raíz del repositorio)
-import { chromium } from 'playwright';
+import { chromium, devices } from 'playwright';
 import assert from 'node:assert/strict';
 import http from 'node:http';
 import fs from 'node:fs';
@@ -46,8 +46,8 @@ try {
   const cz = (expr, arg) => page.evaluate(expr, arg);
 
   // --- Carga y menús ---
-  check('01 título de la página', await page.title() === 'COMBAT ZONE 8.1 — Operación Distrito Gris');
-  check('02 versión 8.1 expuesta', await cz(() => window.__cz.version === '8.1'));
+  check('01 título de la página', await page.title() === 'COMBAT ZONE 8.2 — Operación Distrito Gris');
+  check('02 versión 8.2 expuesta', await cz(() => window.__cz.version === '8.2'));
   await page.waitForSelector('#mainMenu:not(.hidden)', { timeout: 5000 });
   check('03 menú principal visible tras la carga', await page.locator('#mainMenu').isVisible() && !(await page.locator('#loading').isVisible()));
   check('04 botones del menú principal', await page.locator('#btnPlay').count() === 1 && await page.locator('#btnSettings').count() === 1 && await page.locator('#btnControls').count() === 1);
@@ -153,7 +153,38 @@ try {
   check('51 salir al menú principal', await page.locator('#mainMenu').isVisible() && await cz(() => window.__cz.state === 'menu'));
   await page.setViewportSize({ width: 390, height: 844 });
   check('52 el menú cabe en móvil', await page.locator('#btnPlay').isVisible());
+  // --- Mapa Centro de Lima ---
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.click('[data-map="lima"]');
+  check('54 se puede elegir el mapa Centro de Lima', await cz(() => window.__cz.mapId === 'lima') && await page.locator('[data-map="lima"].on').count() === 1);
+  await page.click('#btnPlay');
+  check('55 la partida empieza en Lima con 8 hostiles', await cz(() => window.__cz.state === 'playing' && window.__cz.zone === 'lima' && window.__cz.hostilesAlive === 8 && window.__cz.colliders > 60));
+  check('56 el título del objetivo dice CENTRO DE LIMA', (await page.locator('#objTitle').innerText()).includes('CENTRO DE LIMA'));
+  await cz(() => { window.__cz.heal(); for (let i = 0; i < 8; i++) window.__cz.killOne(); });
+  check('57 desde Lima también se llega a la Arena', await until(page, () => { window.__cz.heal(); return window.__cz.zone === 'arena'; }, null, 20000));
+  await cz(() => { window.__cz.quit(); window.__cz.setMap('gris'); });
+  await page.setViewportSize({ width: 390, height: 844 });
   check('52a el menú muestra el récord', (await page.locator('#bestLine').innerText()).includes('Récord'));
+  // --- Celular: controles táctiles ---
+  const mctx = await browser.newContext({ ...devices['Pixel 7 landscape'] });
+  const m = await mctx.newPage();
+  m.on('pageerror', e => pageErrors.push('móvil: ' + e.message));
+  await m.goto('http://127.0.0.1:4173/', { waitUntil: 'domcontentloaded' });
+  await m.waitForFunction(() => window.__cz && window.__cz.state === 'menu', null, { timeout: 40000 });
+  check('58 en el celular se activa el modo táctil', await m.evaluate(() => window.__cz.touchMode === true) && (await m.locator('#touchWarn').innerText()).includes('joystick'));
+  await m.tap('#btnPlay');
+  check('59 aparecen joystick y botones', await until(m, () => window.__cz.state === 'playing' && !document.querySelector('#touch').classList.contains('hidden'), null, 5000) && await m.locator('#tFire').isVisible());
+  const z0 = await m.evaluate(() => window.__cz.position.z);
+  await m.evaluate(() => window.__cz.touchMove(0, -1));
+  check('60 el joystick mueve al jugador', await until(m, (z) => window.__cz.position.z < z - .5, z0, 15000));
+  await m.evaluate(() => window.__cz.touchMove(0, 0));
+  await m.tap('#tFire');
+  check('61 el botón FUEGO dispara', await until(m, () => window.__cz.ammo < 30, null, 3000));
+  await m.tap('#tReload');
+  check('62 el botón R recarga', await until(m, () => window.__cz.reloading || window.__cz.ammo === 30, null, 3000));
+  check('63 los consejos hablan de controles táctiles', await until(m, () => document.querySelector('#hint').textContent.includes('Joystick'), null, 15000));
+  await mctx.close();
+
   check('53 no hay excepciones JavaScript', pageErrors.length === 0);
   if (pageErrors.length) console.error(pageErrors);
   console.log(`RESULTADO: ${passed} pruebas superadas`);

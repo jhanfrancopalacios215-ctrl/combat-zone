@@ -80,9 +80,7 @@ try {
   // --- Armas ---
   await cz(() => window.__cz.fire());
   check('21 disparar gasta una bala', await cz(() => window.__cz.ammo === 29));
-  check('22 respeta la cadencia del arma', await cz(() => window.__cz.fire() === false && window.__cz.ammo === 29));
-  await page.waitForTimeout(150);
-  await cz(() => window.__cz.fire());
+  check('22 respeta la cadencia del arma', await cz(async () => { const z = window.__cz; await new Promise(r => setTimeout(r, 150)); const a = z.fire(), b = z.fire(); return a === true && b === false; }));
   check('23 segundo disparo tras la cadencia', await cz(() => window.__cz.ammo === 28));
   check('24 disparar a la calle deja marcas de impacto', await until(page, () => window.__cz.decals > 0, null, 3000));
   await cz(() => window.__cz.selectWeapon(2));
